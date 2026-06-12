@@ -18,6 +18,9 @@ class User(AbstractUser):
     phone = PhoneNumberField(
         unique=True,region="UZ",
     )
+
+    def __str__(self):
+        return f"{self.pk} {self.username}"
     
 
 
@@ -31,3 +34,9 @@ class Parents(models.Model):
     phone = PhoneNumberField(
         unique=True,region="UZ",
     )
+
+    def __str__(self):
+        return f"{self.pk} {self.user.username}"
+    
+    class Meta:
+        ordering = ['-pk']
