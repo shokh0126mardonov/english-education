@@ -14,7 +14,8 @@ from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
 from decouple import config,Csv
-\
+from datetime import timedelta
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "phonenumber_field",
+    'rest_framework_simplejwt',
+    'drf_spectacular',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -130,3 +133,27 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'English center project',
+    'DESCRIPTION': 'English o\'quv markazi loyihasi',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Uncomment the line below if using drf-spectacular-sidecar:
+    # 'SWAGGER_UI_DIST': 'SIDECAR',
+    # 'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    # 'REDOC_DIST': 'SIDECAR',
+}
