@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Education Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="app" class="app-shell">
+      <section class="auth-screen" data-view="auth">
+        <div class="auth-media" aria-hidden="true">
+          <div class="brand-lockup">
+            <span class="brand-mark">EE</span>
+            <div>
+              <strong>English Education</strong>
+              <span>O'quv markazi boshqaruvi</span>
+            </div>
+          </div>
+          <div class="media-copy">
+            <p>Students, parents and staff in one quiet workspace.</p>
+          </div>
+        </div>
+
+        <form id="loginForm" class="login-panel">
+          <div class="panel-heading">
+            <span class="eyebrow">Dashboard</span>
+            <h1>Kirish</h1>
+            <p>O'quv markazi boshqaruv paneliga xavfsiz kiring.</p>
+          </div>
+
+          <label>
+            Username
+            <input name="username" autocomplete="username" required />
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+
+          <button class="primary-action" type="submit">
+            <span>Kirish</span>
+            <span aria-hidden="true">-></span>
+          </button>
+          <p id="loginMessage" class="form-message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="workspace hidden" data-view="workspace">
+        <aside class="sidebar">
+          <div class="brand-lockup compact">
+            <span class="brand-mark">EE</span>
+            <div>
+              <strong>English Education</strong>
+              <span id="roleBadge">-</span>
+            </div>
+          </div>
+
+          <nav class="nav-list" aria-label="Asosiy menyu">
+            <button class="nav-item active" data-section="overview">Overview</button>
+            <button class="nav-item" data-section="users" data-admin-only>Users</button>
+            <button class="nav-item" data-section="parents" data-admin-only>Parents</button>
+            <button class="nav-item" data-section="telegram" data-telegram-access>Telegram</button>
+            <button class="nav-item" data-section="profile">Profile</button>
+          </nav>
+
+          <button id="logoutBtn" class="ghost-action" type="button">Chiqish</button>
+        </aside>
+
+        <div class="content">
+          <header class="topbar">
+            <div>
+              <span class="eyebrow">Control room</span>
+              <h2 id="pageTitle">Overview</h2>
+            </div>
+            <div class="user-chip">
+              <span id="userInitials">--</span>
+              <div>
+                <strong id="currentName">-</strong>
+                <small id="currentPhone">-</small>
+              </div>
+            </div>
+          </header>
+
+          <section id="toast" class="toast hidden" role="status"></section>
+
+          <section class="section active" data-panel="overview">
+            <div class="stats-grid">
+              <article>
+                <span>Users</span>
+                <strong id="usersCount">-</strong>
+              </article>
+              <article>
+                <span>Parents</span>
+                <strong id="parentsCount">-</strong>
+              </article>
+              <article>
+                <span>Role</span>
+                <strong id="currentRole">-</strong>
+              </article>
+            </div>
+
+            <div class="workband">
+              <div>
+                <span class="eyebrow">API status</span>
+                <h3>Backend bilan bog'lanish</h3>
+                <p id="apiStatus">Login qilingandan keyin ma'lumotlar yuklanadi.</p>
+              </div>
+              <button id="refreshAllBtn" class="secondary-action" type="button">Yangilash</button>
+            </div>
+          </section>
+
+          <section class="section" data-panel="users">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">Admin area</span>
+                <h3>Foydalanuvchilar</h3>
+              </div>
+              <button id="newUserBtn" class="primary-action small" type="button">Yangi user</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Ism</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="section" data-panel="parents">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">Admin area</span>
+                <h3>Ota-onalar</h3>
+              </div>
+              <button id="newParentBtn" class="primary-action small" type="button">Yangi parent</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Full name</th>
+                    <th>Phone</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="parentsTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="section" data-panel="telegram">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">Teacher/Admin</span>
+                <h3>Telegram ulanish tekshiruvi</h3>
+              </div>
+            </div>
+
+            <form id="telegramForm" class="inline-form">
+              <label>
+                Student user ID
+                <input name="studentId" type="number" min="1" required />
+              </label>
+              <button class="secondary-action" type="submit">Tekshirish</button>
+            </form>
+            <div id="telegramResult" class="result-box">Student ID kiriting.</div>
+          </section>
+
+          <section class="section" data-panel="profile">
+            <div class="two-column">
+              <form id="profileForm" class="edit-panel">
+                <div class="panel-heading compact-heading">
+                  <span class="eyebrow">Account</span>
+                  <h3>Profil</h3>
+                </div>
+                <input name="id" type="hidden" />
+                <label>Username <input name="username" required /></label>
+                <label>First name <input name="first_name" /></label>
+                <label>Last name <input name="last_name" /></label>
+                <label>Email <input name="email" type="email" /></label>
+                <label>Phone <input name="phone" placeholder="+998901234567" required /></label>
+                <button class="primary-action" type="submit">Saqlash</button>
+              </form>
+
+              <form id="passwordForm" class="edit-panel">
+                <div class="panel-heading compact-heading">
+                  <span class="eyebrow">Security</span>
+                  <h3>Parol</h3>
+                </div>
+                <label>Eski parol <input name="old_password" type="password" required /></label>
+                <label>Yangi parol <input name="new_password" type="password" required /></label>
+                <button class="secondary-action" type="submit">Almashtirish</button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="userDialog">
+      <form id="userForm" method="dialog" class="dialog-body">
+        <div class="dialog-head">
+          <h3 id="userDialogTitle">User</h3>
+          <button class="icon-action" value="cancel" type="submit" aria-label="Yopish">x</button>
+        </div>
+        <input name="id" type="hidden" />
+        <div class="form-grid">
+          <label>Username <input name="username" required /></label>
+          <label>Password <input name="password" type="password" data-create-required /></label>
+          <label>First name <input name="first_name" /></label>
+          <label>Last name <input name="last_name" /></label>
+          <label>Email <input name="email" type="email" /></label>
+          <label>Phone <input name="phone" placeholder="+998901234567" required /></label>
+          <label>
+            Role
+            <select name="role" required>
+              <option value="STUDENT">Student</option>
+              <option value="TEACHER">Teacher</option>
+              <option value="ADMIN">Admin</option>
+              <option value="SUPERADMIN">Superadmin</option>
+            </select>
+          </label>
+        </div>
+        <div class="dialog-actions">
+          <button class="ghost-action" value="cancel" type="submit">Bekor qilish</button>
+          <button id="saveUserBtn" class="primary-action small" value="default" type="button">Saqlash</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="parentDialog">
+      <form id="parentForm" method="dialog" class="dialog-body">
+        <div class="dialog-head">
+          <h3 id="parentDialogTitle">Parent</h3>
+          <button class="icon-action" value="cancel" type="submit" aria-label="Yopish">x</button>
+        </div>
+        <input name="id" type="hidden" />
+        <div class="form-grid">
+          <label>
+            Student
+            <select name="user" required>
+              <option value="">Student tanlang</option>
+            </select>
+          </label>
+          <label>Full name <input name="full_name" required /></label>
+          <label>Phone <input name="phone" placeholder="+998901234567" required /></label>
+        </div>
+        <div class="dialog-actions">
+          <button class="ghost-action" value="cancel" type="submit">Bekor qilish</button>
+          <button id="saveParentBtn" class="primary-action small" value="default" type="button">Saqlash</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import action
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, Parents, UserRole
 from .serializers import (
@@ -14,6 +16,28 @@ from .serializers import (
 )
 from .permissions import IsAdminOrSuperAdmin,IsTeacher
 
+
+class LoginView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.user
+
+        if not user.is_active:
+            return Response({"detail": "User is not active"}, status=401)
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "role": user.role,
+                "id": user.id,
+            }
+        )
+    
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

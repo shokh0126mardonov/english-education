@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, ParentsViewSet,ParentTelegramConnection
+from .views import UserViewSet, ParentsViewSet,ParentTelegramConnection,LoginView
 
 router = DefaultRouter()
 
@@ -14,7 +14,7 @@ router.register(r'parents', ParentsViewSet, basename='parent')
 
 
 urlpatterns = [
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/', LoginView.as_view(), name='token_obtain_pair'),
     path('', include(router.urls)),
     path('telegram-check/<int:pk>/',ParentTelegramConnection.as_view())
 ]
