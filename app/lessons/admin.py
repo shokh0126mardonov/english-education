@@ -38,34 +38,36 @@ class LessonAdminForm(forms.ModelForm):
         model = Lesson
         fields = '__all__'
 
-def upload_video_to_youtube_bg(lesson_id, temp_file_path, title, description):
+def upload_video_to_youtube_bg(lesson_id, temp_file_path, title, description, schema_name):
     from app.lessons.models import Lesson
+    from django_tenants.utils import schema_context
     
-    try:
-        yt_service = YouTubeService()
-        result = yt_service.upload_video(
-            file_path=temp_file_path,
-            title=title,
-            description=description
-        )
-        
-        # Save results
-        Lesson.objects.filter(id=lesson_id).update(
-            youtube_video_id=result['video_id'],
-            youtube_url=result['url'],
-            upload_status='uploaded',
-            uploaded_at=timezone.now()
-        )
-    except Exception:
-        Lesson.objects.filter(id=lesson_id).update(
-            upload_status='failed'
-        )
-    finally:
-        if os.path.exists(temp_file_path):
-            try:
-                os.remove(temp_file_path)
-            except Exception:
-                pass
+    with schema_context(schema_name):
+        try:
+            yt_service = YouTubeService()
+            result = yt_service.upload_video(
+                file_path=temp_file_path,
+                title=title,
+                description=description
+            )
+            
+            # Save results
+            Lesson.objects.filter(id=lesson_id).update(
+                youtube_video_id=result['video_id'],
+                youtube_url=result['url'],
+                upload_status='uploaded',
+                uploaded_at=timezone.now()
+            )
+        except Exception:
+            Lesson.objects.filter(id=lesson_id).update(
+                upload_status='failed'
+            )
+        finally:
+            if os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                except Exception:
+                    pass
 
 from django.utils.html import format_html
 
@@ -104,7 +106,8 @@ class LessonAdmin(admin.ModelAdmin):
                     obj.id, 
                     temp_file_path, 
                     obj.topic or f"Lesson: {obj.topic}", 
-                    f"Video lesson for group {obj.group.name}"
+                    f"Video lesson for group {obj.group.name}",
+                    request.tenant.schema_name
                 )
             )
             thread.start()

@@ -88,7 +88,7 @@ class LessonViewSet(viewsets.ModelViewSet):
             lesson.save()
 
             # Trigger background Celery task
-            upload_lesson_video_to_youtube_task.delay(lesson.id)
+            upload_lesson_video_to_youtube_task.delay(lesson.id, request.tenant.schema_name)
 
             return Response({
                 "message": "Upload initiated. Video is being processed in the background.",
