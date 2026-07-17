@@ -67,13 +67,21 @@ def upload_video_to_youtube_bg(lesson_id, temp_file_path, title, description):
             except Exception:
                 pass
 
+from django.utils.html import format_html
+
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     form = LessonAdminForm
-    list_display = ['topic', 'group', 'date', 'start_time', 'end_time', 'upload_status']
+    list_display = ['topic', 'group', 'date', 'start_time', 'end_time', 'upload_status', 'watch_video']
     list_filter = ['group', 'date', 'upload_status']
     search_fields = ['topic']
-    readonly_fields = ['youtube_video_id', 'youtube_url', 'upload_status', 'uploaded_at']
+    readonly_fields = ['youtube_video_id', 'youtube_url', 'upload_status', 'uploaded_at', 'watch_video']
+
+    def watch_video(self, obj):
+        if obj.youtube_url:
+            return format_html('<a href="{}" target="_blank" style="background:#10b981;color:white;padding:5px 10px;border-radius:4px;text-decoration:none;">▶ Ko\'rish</a>', obj.youtube_url)
+        return "-"
+    watch_video.short_description = "Video"
 
     def save_model(self, request, obj, form, change):
         video_file = form.cleaned_data.get('video_file')
