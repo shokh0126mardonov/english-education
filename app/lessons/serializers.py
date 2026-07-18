@@ -21,7 +21,7 @@ class LessonVideoUploadSerializer(serializers.Serializer):
 
         return value
 
-from app.lessons.models import Lesson, Group
+from app.lessons.models import Lesson, Group, Course, Enrollment, Attendance, Material
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,3 +38,27 @@ class LessonSerializer(serializers.ModelSerializer):
             'topic', 'youtube_video_id', 'youtube_url', 'upload_status', 'uploaded_at'
         ]
 
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = '__all__'
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    group_name = serializers.CharField(source='group.name', read_only=True)
+
+    class Meta:
+        model = Enrollment
+        fields = ['id', 'student', 'student_name', 'group', 'group_name', 'joined_date', 'status']
+
+class AttendanceSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+
+    class Meta:
+        model = Attendance
+        fields = ['id', 'lesson', 'student', 'student_name', 'status', 'created_at']
+
+class MaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Material
+        fields = '__all__'

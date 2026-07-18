@@ -7,8 +7,11 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 
-from app.lessons.models import Lesson, Group
-from app.lessons.serializers import LessonVideoUploadSerializer, LessonSerializer, GroupSerializer
+from app.lessons.models import Lesson, Group, Course, Enrollment, Attendance, Material
+from app.lessons.serializers import (
+    LessonVideoUploadSerializer, LessonSerializer, GroupSerializer,
+    CourseSerializer, EnrollmentSerializer, AttendanceSerializer, MaterialSerializer
+)
 from app.common.services.youtube import YouTubeService
 from app.common.services.exceptions import YouTubeError
 from app.lessons.tasks import upload_lesson_video_to_youtube_task
@@ -110,3 +113,18 @@ class LessonViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class CourseViewSet(viewsets.ModelViewSet):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+
+class EnrollmentViewSet(viewsets.ModelViewSet):
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
+
+class AttendanceViewSet(viewsets.ModelViewSet):
+    queryset = Attendance.objects.all()
+    serializer_class = AttendanceSerializer
+
+class MaterialViewSet(viewsets.ModelViewSet):
+    queryset = Material.objects.all()
+    serializer_class = MaterialSerializer
