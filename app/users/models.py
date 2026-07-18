@@ -28,3 +28,18 @@ class User(AbstractUser, BaseModel):
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
+
+
+class Parents(BaseModel):
+    user = models.ForeignKey(User,limit_choices_to={'role': User.RoleChoices.STUDENT}, on_delete=models.CASCADE, related_name='parent') 
+    full_name = models.CharField(max_length=100, verbose_name="To'liq ismi")
+    phone = models.CharField(max_length=20, verbose_name="Telefon raqami", unique=True)
+    telegram_id = models.CharField(max_length=50, null=True, blank=True, verbose_name="Telegram ID")
+    telegram_username = models.CharField(max_length=50, null=True, blank=True, verbose_name="Telegram username")
+
+    class Meta:
+        verbose_name = "Ota-ona"
+        verbose_name_plural = "Ota-onalar"
+
+    def __str__(self):
+        return f"{self.full_name} - {self.user.username}"

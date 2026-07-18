@@ -1,66 +1,65 @@
-from rest_framework import status, viewsets
-from rest_framework.views import APIView
+# app/views.py
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from app.users.models import User
-from app.users.serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from rest_framework.permissions import IsAuthenticated
+from .models import User, Parents
+from .serializers import UserSerializer, ParentsSerializer
+from .permissions import UserAccessPermission
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to manage User resources (Teachers, Students, Admins).
-    Supports filtering by role, e.g., GET /api/users/?role=teacher
-    """
-    serializer_class = UserSerializer
     queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [UserAccessPermission]
 
-    def get_queryset(self):
-        queryset = User.objects.all()
-        role = self.request.query_params.get('role')
-        if role:
-            queryset = queryset.filter(role=role)
-        return queryset
+    def destroy(self, request, *args, **kwargs):
+        # Faqat admin va manager foydalanuvchini o'chira oladi (permission qisman buni yopgan, bu yerda aniq qilamiz)
+        if request.user.role not in ['admin', 'manager']:
+            return Response({"detail": "O'chirishga ruxsat yo'q."}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
 
 
-class RegisterView(APIView):
-    """
-    API View to handle user registration. Returns JWT credentials and profile
-    upon successful creation.
-    """
-    permission_classes = [AllowAny]
+class ParentsViewSet(viewsets.ModelViewSet):
+    queryset = Parents.objects.all()
+    serializer_class = ParentsSerializer
+    # Ota-onalarni ham hamma (studentdan tashqari) boshqarishi uchun IsAuthenticated ishlatamiz, serializerda cheklaymiz
+    permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+    def perform_destroy(self, instance):
+        if self.request.user.role == 'student':
+            raise serializers.ValidationError("Student ota-onani o'chira olmaydi.")
+        instance.delete()
 
-        # Generate tokens to immediately authenticate the newly registered user
-        refresh = RefreshToken.for_user(user)
-        user_serializer = UserSerializer(user)
 
+# 4-ETAP: Student ID kelganda Telegram ID borligini tekshiradigan API
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_student_parent_telegram(request, student_id):
+    try:
+        # Avval kelgan ID rostdan ham student ekanligini tekshiramiz
+        student = User.objects.get(id=student_id, role='student')
+    except User.DoesNotExist:
+        return Response({"detail": "Student topilmadi."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Studentga bog'langan ota-onalarni qidiramiz
+    parent = Parents.objects.filter(user=student).first()
+    
+    if parent and parent.telegram_id is not None:
         return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': user_serializer.data
-        }, status=status.HTTP_201_CREATED)
-
-class LoginView(APIView):
-    """
-    API View to handle user login. Authenticates credentials and returns JWT
-    tokens alongside user profile details.
-    """
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.validated_data
-
-        user_serializer = UserSerializer(validated_data['user'])
-
-        return Response({
-            'refresh': validated_data['refresh'],
-            'access': validated_data['access'],
-            'user': user_serializer.data
+            "status": "success", 
+            "telegram_id": parent.telegram_id
         }, status=status.HTTP_200_OK)
+        
+    return Response({
+        "status": "error", 
+        "detail": "Telegram ID mavjud emas."
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# app/views.py ichiga qo'shing:
+# pyrefly: ignore [missing-import]
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+
+class LoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

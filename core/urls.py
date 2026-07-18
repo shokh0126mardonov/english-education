@@ -16,28 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from app.lessons.views import LessonViewSet, GroupViewSet
-from app.tasks.views import TaskViewSet, GradeViewSet, SubmissionViewSet, QuizQuestionViewSet, StudentBadgeViewSet
-from app.users.views import UserViewSet
-
-router = DefaultRouter()
-router.register(r'lessons', LessonViewSet, basename='lesson')
-router.register(r'groups', GroupViewSet, basename='group')
-router.register(r'tasks', TaskViewSet, basename='task')
-router.register(r'grades', GradeViewSet, basename='grade')
-router.register(r'submissions', SubmissionViewSet, basename='submission')
-router.register(r'quiz-questions', QuizQuestionViewSet, basename='quizquestion')
-router.register(r'badges', StudentBadgeViewSet, basename='studentbadge')
-router.register(r'users', UserViewSet, basename='user')
-
-
-
-
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/auth/', include('app.users.urls')),
+    
+    # Apps URLs
+    path('Lessons/', include('app.lessons.urls')),
+    path('Tasks/', include('app.tasks.urls')),
+    path('User/', include('app.users.urls')),
+    
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
+
+
 

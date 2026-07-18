@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User,Parents
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -30,3 +30,7 @@ class CustomGroupAdmin(GroupAdmin):
         if hasattr(request, 'tenant') and request.tenant.schema_name == 'public':
             return False
         return super().has_module_permission(request)
+
+
+admin.site.register(Parents)
+    
